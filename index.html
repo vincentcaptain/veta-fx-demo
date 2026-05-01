@@ -183,11 +183,18 @@
     background:
       radial-gradient(180px 180px at 80% 20%, rgba(247, 183, 51, 0.22), transparent 70%),
       linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 60%, var(--brand-3) 100%);
-    padding: 0 24px 32px;
+    padding: 0 0 32px;
     color: white;
     border-radius: 0 0 36px 36px;
     position: relative;
     overflow: hidden;
+    min-height: 280px;
+    flex-shrink: 0;
+  }
+  .home-hero-inner {
+    padding: 0 24px;
+    position: relative;
+    z-index: 2;
   }
   .home-hero::before {
     content: '';
@@ -1385,27 +1392,29 @@
 
     <!-- HOME -->
     <div id="screen-home" class="screen active">
-      <div class="status-bar">
-        <span>9:41</span>
-        <span class="icons">
-          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="0.5"/><rect x="4" y="4" width="3" height="7" rx="0.5"/><rect x="8" y="2" width="3" height="9" rx="0.5"/><rect x="12" y="0" width="3" height="11" rx="0.5"/></svg>
-          <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M7 0C4.5 0 2.2 1 .5 2.6l1.4 1.5C3.3 2.7 5.1 1.9 7 1.9c1.9 0 3.7.8 5.1 2.2l1.4-1.5C11.8 1 9.5 0 7 0z"/><path d="M7 4c-1.4 0-2.7.5-3.7 1.4l1.4 1.5c.6-.6 1.4-1 2.3-1s1.7.4 2.3 1l1.4-1.5C9.7 4.5 8.4 4 7 4z"/><circle cx="7" cy="9" r="1.2"/></svg>
-          <svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="20" height="10" rx="2.5" stroke="currentColor" fill="none"/><rect x="2" y="2" width="16" height="7" rx="1.2" fill="currentColor"/><rect x="21" y="3.5" width="2" height="4" rx="0.5" fill="currentColor"/></svg>
-        </span>
-      </div>
       <div class="home-hero">
-        <div class="home-hero-row">
-          <div class="brand-mark"><div class="brand-dot">V</div>Veta</div>
-          <div class="avatar-circle">N</div>
-        </div>
-        <div class="balance-label" data-i18n="availableBalance">Available Balance</div>
-        <div class="balance-amount">12,840.50<span class="currency">USD</span></div>
-        <div class="balance-meta">
-          <span class="pill-gold">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4z"/></svg>
-            <span data-i18n="vetaSecured">Veta-secured</span>
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="icons">
+            <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="0.5"/><rect x="4" y="4" width="3" height="7" rx="0.5"/><rect x="8" y="2" width="3" height="9" rx="0.5"/><rect x="12" y="0" width="3" height="11" rx="0.5"/></svg>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M7 0C4.5 0 2.2 1 .5 2.6l1.4 1.5C3.3 2.7 5.1 1.9 7 1.9c1.9 0 3.7.8 5.1 2.2l1.4-1.5C11.8 1 9.5 0 7 0z"/><path d="M7 4c-1.4 0-2.7.5-3.7 1.4l1.4 1.5c.6-.6 1.4-1 2.3-1s1.7.4 2.3 1l1.4-1.5C9.7 4.5 8.4 4 7 4z"/><circle cx="7" cy="9" r="1.2"/></svg>
+            <svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="20" height="10" rx="2.5" stroke="currentColor" fill="none"/><rect x="2" y="2" width="16" height="7" rx="1.2" fill="currentColor"/><rect x="21" y="3.5" width="2" height="4" rx="0.5" fill="currentColor"/></svg>
           </span>
-          <span data-i18n="updated2min">Updated 2 min ago</span>
+        </div>
+        <div class="home-hero-inner">
+          <div class="home-hero-row">
+            <div class="brand-mark"><div class="brand-dot">V</div>Veta</div>
+            <div class="avatar-circle">N</div>
+          </div>
+          <div class="balance-label" data-i18n="availableBalance">Available Balance</div>
+          <div class="balance-amount">12,840.50<span class="currency">USD</span></div>
+          <div class="balance-meta">
+            <span class="pill-gold">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4z"/></svg>
+              <span data-i18n="vetaSecured">Veta-secured</span>
+            </span>
+            <span data-i18n="updated2min">Updated 2 min ago</span>
+          </div>
         </div>
       </div>
 
