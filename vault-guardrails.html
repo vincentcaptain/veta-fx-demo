@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veta — Vault Guardrails Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand-1: #1B0E5C;
+    --brand-2: #4318D1;
+    --brand-3: #6B2CE8;
+    --gold: #F7B733;
+    --gold-2: #FFB340;
+    --mint: #00C77C;
+    --mint-2: #03A363;
+    --red: #E11D48;
+    --red-2: #BE123C;
+    --hl: #97FCE4; /* hyperliquid teal */
+    --bg: #F4F5FB;
+    --surface: #FFFFFF;
+    --text: #0F1042;
+    --muted: #6B6E91;
+    --muted-2: #9095B5;
+    --border: #E8EAF5;
+    --border-2: #DCE0F0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 90% -10%, rgba(107, 44, 232, 0.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(247, 183, 51, 0.12), transparent 60%),
+      linear-gradient(180deg, #EFF1FA 0%, #DDE2F2 100%);
+    min-height: 100vh;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  body[data-lang="zh"] {
+    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+  .page-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+  }
+
+  /* TOP BAR */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 28px;
+  }
+  .top-left { display: flex; align-items: center; gap: 14px; }
+  .brand-mark { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; letter-spacing: -0.02em; }
+  .brand-dot {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--gold), #FFD580);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-1); font-weight: 900; font-size: 16px;
+    box-shadow: 0 4px 12px rgba(247, 183, 51, 0.35);
+  }
+  .breadcrumb {
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding-left: 14px;
+    border-left: 1px solid var(--border);
+  }
+  .top-right { display: flex; align-items: center; gap: 12px; }
+  .lang-toggle {
+    display: inline-flex;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(15,16,66,0.08);
+    border-radius: 100px;
+    padding: 4px;
+    gap: 2px;
+  }
+  .lang-btn {
+    background: transparent;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 100px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .lang-btn:hover { color: var(--text); }
+  .lang-btn.active {
+    background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+    color: white;
+  }
+  .live-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 199, 124, 0.10);
+    color: var(--mint);
+    padding: 7px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid rgba(0,199,124,0.18);
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--mint);
+    border-radius: 50%;
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  /* HERO */
+  .vault-hero {
+    background:
+      radial-gradient(180px 180px at 88% 18%, rgba(247, 183, 51, 0.22), transparent 70%),
+      linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 60%, var(--brand-3) 100%);
+    border-radius: 28px;
+    padding: 28px 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(27, 14, 92, 0.28);
+  }
+  .vault-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .hero-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    position: relative;
+    z-index: 2;
+  }
+  .vault-meta { flex: 1; }
+  .vault-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(247, 183, 51, 0.16);
+    border: 1px solid rgba(247, 183, 51, 0.4);
+    color: var(--gold);
+    padding: 5px 11px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .vault-name {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .vault-subtitle {
+    font-size: 14px;
+    opacity: 0.78;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .venue-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(151, 252, 228, 0.14);
+    border: 1px solid rgba(151, 252, 228, 0.32);
+    color: var(--hl);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .vault-amount {
+    text-align: right;
+  }
+  .vault-amount-label {
+    font-size: 11px;
+    opacity: 0.7;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .vault-amount-value {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-top: 4px;
+    font-feature-settings: 'tnum';
+  }
+  .vault-amount-value .currency-sm {
+    font-size: 16px; opacity: 0.62; font-weight: 700; margin-left: 5px;
+  }
+  .vault-amount-sub {
+    font-size: 12px;
+    opacity: 0.78;
+    margin-top: 4px;
+  }
+  .vault-amount-sub .pos { color: #6FF7B8; font-weight: 700; }
+  .vault-amount-sub .neg { color: #FF8AB1; font-weight: 700; }
+
+  .hero-policy-row {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.14);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    z-index: 2;
+    flex-wrap: wrap;
+  }
+  .policy-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .policy-pill .pp-label { opacity: 0.7; }
+  .policy-pill .pp-value { font-weight: 800; }
+
+  /* KPI ROW */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 14px rgba(15,16,66,0.04);
+    border: 1px solid var(--border);
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .kpi-value {
+    font-size: 26px;
+    font-weight: 800;
+    margin-top: 6px;
+    letter-spacing: -0.02em;
+    font-feature-settings: 'tnum';
+  }
+  .kpi-value.pos { color: var(--mint-2); }
+  .kpi-value.neg { color: var(--red); }
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .kpi-sub .pos { color: var(--mint-2); font-weight: 700; }
+  .kpi-sub .neg { color: var(--red); font-weight: 700; }
+
+  /* TWO-COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 18px;
+    margin-top: 24px;
+  }
+  .panel {
+    background: var(--surface);
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 20px rgba(15,16,66,0.05);
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .panel-title {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .panel-meta {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .panel-body {
+    padding: 8px 12px 14px;
+  }
+
+  /* ACTIVITY FEED */
+  .filter-pills {
+    display: flex;
+    gap: 6px;
+    padding: 10px 0;
+  }
+  .filter-pill {
+    padding: 6px 12px;
+    border-radius: 100px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.14s ease;
+  }
+  .filter-pill:hover { color: var(--text); }
+  .filter-pill.active {
+    background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+    color: white;
+    border-color: transparent;
+  }
+  .filter-pill .count {
+    margin-left: 5px;
+    font-size: 10px;
+    opacity: 0.7;
+    font-weight: 700;
+  }
+
+  .activity-list {
+    max-height: 540px;
+    overflow-y: auto;
+    padding: 4px 8px 8px;
+  }
+  .activity-list::-webkit-scrollbar { width: 6px; }
+  .activity-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
+
+  .activity-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--mint);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.16s ease;
+  }
+  .activity-item:hover {
+    border-color: var(--brand-3);
+    box-shadow: 0 4px 14px rgba(67,24,209,0.10);
+  }
+  .activity-item.blocked {
+    border-left-color: var(--red);
+    background: linear-gradient(90deg, rgba(225,29,72,0.04), transparent 30%);
+  }
+  .activity-item.new {
+    animation: slideIn 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @keyframes slideIn {
+    from { transform: translateY(-12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .activity-side {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    background: rgba(0,199,124,0.12);
+    color: var(--mint-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .activity-item.blocked .activity-side {
+    background: rgba(225,29,72,0.10);
+    color: var(--red);
+  }
+  .activity-content { flex: 1; min-width: 0; }
+  .activity-action {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .activity-action .asset {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 12px;
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 5px;
+    margin: 0 2px;
+  }
+  .activity-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .activity-meta-row .dot { color: var(--muted-2); }
+  .activity-decision {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 100px;
+  }
+  .activity-decision.allowed {
+    background: rgba(0,199,124,0.12);
+    color: var(--mint-2);
+  }
+  .activity-decision.blocked {
+    background: rgba(225,29,72,0.10);
+    color: var(--red);
+  }
+  .activity-block-reason {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 700;
+  }
+
+  /* POLICY PANEL */
+  .policy-list { padding: 4px 6px 12px; }
+  .policy-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .policy-item:last-child { border-bottom: none; }
+  .policy-item-info { flex: 1; min-width: 0; }
+  .policy-item-name { font-size: 13px; font-weight: 700; }
+  .policy-item-desc {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.45;
+  }
+  .policy-item-value {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--brand-2);
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .policy-footer {
+    padding: 14px 18px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+  }
+  .signed-by {
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .signed-by strong { color: var(--text); font-weight: 800; }
+  .propose-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 100px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.14s ease;
+  }
+  .propose-btn:hover {
+    border-color: var(--brand-2);
+    color: var(--brand-2);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,16,66,0.50);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(15,16,66,0.30);
+    animation: scaleUp 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @keyframes scaleUp {
+    from { transform: scale(0.94); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .modal-header {
+    padding: 24px 26px 18px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .modal-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .modal-tag.allowed { background: rgba(0,199,124,0.12); color: var(--mint-2); }
+  .modal-tag.blocked { background: rgba(225,29,72,0.10); color: var(--red); }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .modal-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .modal-close {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    transition: all 0.14s ease;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body {
+    padding: 18px 26px 22px;
+  }
+  .modal-section { margin-bottom: 18px; }
+  .modal-section:last-child { margin-bottom: 0; }
+  .modal-section-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .params-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 18px;
+  }
+  .param-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .param-row:last-child { border-bottom: none; }
+  .param-row .lbl { color: var(--muted); }
+  .param-row .val { font-weight: 700; font-feature-settings: 'tnum'; }
+  .param-row .val.mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  .rules-eval {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .rule-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .rule-status {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: white;
+    font-size: 11px;
+    font-weight: 900;
+  }
+  .rule-status.pass { background: var(--mint); }
+  .rule-status.fail { background: var(--red); }
+  .rule-name { flex: 1; font-weight: 700; }
+  .rule-detail { color: var(--muted); font-size: 11px; }
+
+  .signature-card {
+    background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: white;
+  }
+  .signature-card .lbl { opacity: 0.7; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .signature-card .hash {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 5px;
+    word-break: break-all;
+  }
+  .signature-card .meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    font-size: 11px;
+    opacity: 0.85;
+  }
+
+  /* footer caption */
+  .footer-caption {
+    margin-top: 28px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .footer-caption strong { color: var(--text); }
+  .legal {
+    margin-top: 12px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 10px;
+    opacity: 0.7;
+    letter-spacing: 0.04em;
+  }
+
+  /* Responsive */
+  @media (max-width: 980px) {
+    .two-col { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .hero-row { flex-direction: column; }
+    .vault-amount { text-align: left; width: 100%; }
+    .params-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .vault-name { font-size: 26px; }
+    .vault-amount-value { font-size: 26px; }
+    .top-bar { flex-wrap: wrap; gap: 12px; }
+    .breadcrumb { display: none; }
+  }
+</style>
+</head>
+<body data-lang="en">
+  <div class="page-wrap">
+    <header class="top-bar">
+      <div class="top-left">
+        <div class="brand-mark"><div class="brand-dot">V</div>Veta</div>
+        <div class="breadcrumb" data-i18n="breadcrumb">Vault Guardrails</div>
+      </div>
+      <div class="top-right">
+        <div class="live-status"><span class="live-dot"></span><span data-i18n="live">Live</span></div>
+        <div class="lang-toggle">
+          <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="vault-hero">
+      <div class="hero-row">
+        <div class="vault-meta">
+          <div class="vault-tag">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <span data-i18n="vetaGated">Veta-gated · Policy v1.4</span>
+          </div>
+          <div class="vault-name">Sigma Edge Vault</div>
+          <div class="vault-subtitle">
+            <span><span data-i18n="managedBy">Managed by</span> <strong>Apex Quantitative</strong></span>
+            <span class="venue-chip">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>
+              Hyperliquid
+            </span>
+          </div>
+        </div>
+        <div class="vault-amount">
+          <div class="vault-amount-label" data-i18n="yourPosition">Your position</div>
+          <div class="vault-amount-value">118,540<span class="currency-sm">USDC</span></div>
+          <div class="vault-amount-sub">
+            <span class="pos">+8,520 USDC (+7.7%)</span> · 0.84% <span data-i18n="ofTvl">of TVL</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-policy-row">
+        <div class="policy-pill">
+          <span class="pp-label" data-i18n="strategy">Strategy</span>
+          <span class="pp-value" data-i18n="strategyValue">Delta-neutral perps basis</span>
+        </div>
+        <div class="policy-pill">
+          <span class="pp-label" data-i18n="venueLabel">Venue</span>
+          <span class="pp-value">Hyperliquid</span>
+        </div>
+        <div class="policy-pill">
+          <span class="pp-label" data-i18n="lpsLabel">LPs</span>
+          <span class="pp-value">15</span>
+        </div>
+        <div class="policy-pill">
+          <span class="pp-label" data-i18n="inceptionLabel">Inception</span>
+          <span class="pp-value">Jan 12, 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label" data-i18n="kpiTvl">TVL</div>
+        <div class="kpi-value">$14.20M</div>
+        <div class="kpi-sub"><span class="pos" data-i18n="kpiTvlSub">+$1.84M (30d)</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label" data-i18n="kpiReturn">30d Return</div>
+        <div class="kpi-value pos">+7.20%</div>
+        <div class="kpi-sub" data-i18n="kpiReturnSub">vs. benchmark +2.1%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label" data-i18n="kpiDD">Max drawdown (30d)</div>
+        <div class="kpi-value">−2.10%</div>
+        <div class="kpi-sub" data-i18n="kpiDDSub">cap: 8% · auto-pause armed</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label" data-i18n="kpiGates">Gates today</div>
+        <div class="kpi-value" id="kpi-gates-value">12 / 3</div>
+        <div class="kpi-sub"><span class="pos" id="kpi-allowed-count">12 allowed</span> · <span class="neg" id="kpi-blocked-count">3 blocked</span></div>
+      </div>
+    </section>
+
+    <section class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title" data-i18n="liveActivity">Live activity</div>
+            <div class="panel-meta" data-i18n="liveActivitySub">Manager actions · enforced in real-time</div>
+          </div>
+          <div class="filter-pills" id="filter-pills">
+            <button class="filter-pill active" data-filter="all" onclick="setFilter('all')"><span data-i18n="filterAll">All</span><span class="count" id="count-all">15</span></button>
+            <button class="filter-pill" data-filter="allowed" onclick="setFilter('allowed')"><span data-i18n="filterAllowed">Allowed</span><span class="count" id="count-allowed">12</span></button>
+            <button class="filter-pill" data-filter="blocked" onclick="setFilter('blocked')"><span data-i18n="filterBlocked">Blocked</span><span class="count" id="count-blocked">3</span></button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="activity-list" id="activity-list"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title" data-i18n="policyTitle">Active policy</div>
+            <div class="panel-meta">v1.4 · <span data-i18n="signedBy">12 of 15 LPs signed</span></div>
+          </div>
+        </div>
+        <div class="policy-list" id="policy-list"></div>
+        <div class="policy-footer">
+          <div class="signed-by"><span data-i18n="lastReview">Last review</span>: <strong>3 days ago</strong></div>
+          <button class="propose-btn" data-i18n="proposeChange">Propose change</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-caption">
+      <strong data-i18n="captionStrong">How it works:</strong>
+      <span data-i18n="captionRest">Apex Quantitative submits trade actions through Veta. Each action is evaluated against the LP-signed policy in real-time. Allowed actions execute on Hyperliquid; blocked actions never reach the venue. Every decision is signed and auditable.</span>
+    </div>
+    <div class="legal" data-i18n="legal">FOR PARTNER REVIEW ONLY · NOT A LIVE PRODUCT · VAULT NAMES, MANAGER FIRM, AND TRADES SIMULATED</div>
+  </div>
+
+  <!-- ENFORCEMENT MODAL -->
+  <div class="modal-overlay" id="modal" onclick="if(event.target.id==='modal')closeModal()">
+    <div class="modal" id="modal-content">
+      <!-- populated dynamically -->
+    </div>
+  </div>
+
+<script>
+const i18n = {
+  en: {
+    breadcrumb: 'Vault Guardrails',
+    live: 'Live',
+    vetaGated: 'Veta-gated · Policy v1.4',
+    managedBy: 'Managed by',
+    yourPosition: 'Your position',
+    ofTvl: 'of TVL',
+    strategy: 'Strategy', strategyValue: 'Delta-neutral perps basis',
+    venueLabel: 'Venue', lpsLabel: 'LPs', inceptionLabel: 'Inception',
+    kpiTvl: 'TVL', kpiTvlSub: '+$1.84M (30d)',
+    kpiReturn: '30d Return', kpiReturnSub: 'vs. benchmark +2.1%',
+    kpiDD: 'Max drawdown (30d)', kpiDDSub: 'cap: 8% · auto-pause armed',
+    kpiGates: 'Gates today',
+    allowedCount: '{n} allowed', blockedCount: '{n} blocked',
+    liveActivity: 'Live activity', liveActivitySub: 'Manager actions · enforced in real-time',
+    filterAll: 'All', filterAllowed: 'Allowed', filterBlocked: 'Blocked',
+    policyTitle: 'Active policy', signedBy: '12 of 15 LPs signed',
+    lastReview: 'Last review', proposeChange: 'Propose change',
+    captionStrong: 'How it works:',
+    captionRest: 'Apex Quantitative submits trade actions through Veta. Each action is evaluated against the LP-signed policy in real-time. Allowed actions execute on Hyperliquid; blocked actions never reach the venue. Every decision is signed and auditable.',
+    legal: 'FOR PARTNER REVIEW ONLY · NOT A LIVE PRODUCT · VAULT NAMES, MANAGER FIRM, AND TRADES SIMULATED',
+    decisionAllowed: 'Allowed', decisionBlocked: 'Blocked',
+    actionType_open: 'Opened', actionType_close: 'Closed', actionType_adjust: 'Adjusted',
+    actionType_rebalance: 'Rebalanced', actionType_withdraw: 'Withdrawal request',
+    actionType_attempt: 'Attempted',
+    sideLong: 'long', sideShort: 'short',
+    leverageX: '{x}× leverage',
+    notional: 'notional',
+    blockedReason: 'Reason',
+    enforcementRecord: 'Veta Enforcement Record',
+    actionParams: 'Action parameters',
+    rulesEvaluated: 'Rules evaluated',
+    sigSection: 'Cryptographic signature',
+    paramAction: 'Action', paramAsset: 'Asset', paramSide: 'Side', paramSize: 'Size',
+    paramLeverage: 'Leverage', paramVenue: 'Venue', paramManager: 'Manager wallet',
+    paramTime: 'Timestamp',
+    rulePolicyVer: 'Policy version', ruleSigHash: 'Signature hash',
+    ruleBlockHeight: 'Block height',
+    rulesAllPass: 'All policy rules passed', rulesOneFail: 'Policy rule failed',
+    closeBtn: 'Close',
+    policyName_leverage: 'Max leverage', policyDesc_leverage: 'Max notional leverage per position across all assets.',
+    policyName_assets: 'Asset whitelist', policyDesc_assets: 'Only these instruments can be traded by the manager.',
+    policyName_dd: 'Daily drawdown cap', policyDesc_dd: 'Auto-pause trading if 24h P&L falls below this threshold.',
+    policyName_concentration: 'Position concentration', policyDesc_concentration: 'Max share of vault NAV in any single asset.',
+    policyName_withdraw: 'LP withdrawal', policyDesc_withdraw: '24-hour cooldown · max 25% of TVL per LP per day.',
+    policyName_venue: 'Approved venue', policyDesc_venue: 'Trades may only route to whitelisted venues.',
+    policyName_authority: 'Update authority', policyDesc_authority: 'Policy updates require this share of LP votes.',
+    policyVal_assets: 'BTC · ETH · SOL · ARB',
+    minutesAgo: '{n}m ago', secondsAgo: '{n}s ago', justNow: 'just now',
+    blockReasons: {
+      'leverage-cap': 'Leverage cap (5×) — requested {x}×',
+      'asset-whitelist': 'Asset {asset} not whitelisted',
+      'concentration-cap': 'Concentration cap — would breach {pct}% per-asset limit',
+      'withdrawal-limit': 'Withdrawal limit — exceeds 25% per-LP daily cap',
+      'dd-pause': 'Trading paused — daily DD threshold reached',
+    },
+  },
+  zh: {
+    breadcrumb: '金库守护',
+    live: '实时',
+    vetaGated: 'Veta 守护 · 策略 v1.4',
+    managedBy: '管理方',
+    yourPosition: '您的份额',
+    ofTvl: '占 TVL',
+    strategy: '策略', strategyValue: '中性永续套利',
+    venueLabel: '交易场所', lpsLabel: 'LP 数', inceptionLabel: '成立日',
+    kpiTvl: '总资产', kpiTvlSub: '+$1.84M (30 天)',
+    kpiReturn: '30 天收益', kpiReturnSub: '基准 +2.1%',
+    kpiDD: '最大回撤 (30 天)', kpiDDSub: '上限: 8% · 自动暂停已启用',
+    kpiGates: '今日守护',
+    allowedCount: '{n} 允许', blockedCount: '{n} 阻止',
+    liveActivity: '实时活动', liveActivitySub: '经理操作 · 实时执行',
+    filterAll: '全部', filterAllowed: '已允许', filterBlocked: '已阻止',
+    policyTitle: '生效策略', signedBy: '12 / 15 LP 已签名',
+    lastReview: '最近审阅', proposeChange: '提议变更',
+    captionStrong: '工作机制:',
+    captionRest: 'Apex Quantitative 通过 Veta 提交交易操作。每个操作均依据 LP 签名的策略实时评估。被允许的操作在 Hyperliquid 上执行；被阻止的操作永远不会到达交易场所。每个决策都有签名且可审计。',
+    legal: '仅供合作方审阅 · 非真实产品 · 金库名称、管理方及交易均为模拟数据',
+    decisionAllowed: '允许', decisionBlocked: '阻止',
+    actionType_open: '开仓', actionType_close: '平仓', actionType_adjust: '调整',
+    actionType_rebalance: '再平衡', actionType_withdraw: '提款请求',
+    actionType_attempt: '尝试',
+    sideLong: '做多', sideShort: '做空',
+    leverageX: '{x}× 杠杆',
+    notional: '名义价值',
+    blockedReason: '原因',
+    enforcementRecord: 'Veta 执行记录',
+    actionParams: '操作参数',
+    rulesEvaluated: '规则评估',
+    sigSection: '加密签名',
+    paramAction: '操作', paramAsset: '标的', paramSide: '方向', paramSize: '规模',
+    paramLeverage: '杠杆', paramVenue: '交易场所', paramManager: '经理钱包',
+    paramTime: '时间戳',
+    rulePolicyVer: '策略版本', ruleSigHash: '签名哈希',
+    ruleBlockHeight: '区块高度',
+    rulesAllPass: '所有策略规则均通过', rulesOneFail: '策略规则未通过',
+    closeBtn: '关闭',
+    policyName_leverage: '最大杠杆', policyDesc_leverage: '所有标的单仓最大名义杠杆。',
+    policyName_assets: '资产白名单', policyDesc_assets: '经理仅可交易这些标的。',
+    policyName_dd: '每日回撤上限', policyDesc_dd: '若 24 小时内损益跌破此阈值，自动暂停交易。',
+    policyName_concentration: '持仓集中度', policyDesc_concentration: '单一标的占金库 NAV 的最大比例。',
+    policyName_withdraw: 'LP 提款', policyDesc_withdraw: '24 小时冷静期 · 单 LP 单日最多 TVL 的 25%。',
+    policyName_venue: '批准交易场所', policyDesc_venue: '交易仅能路由至白名单交易场所。',
+    policyName_authority: '更新权限', policyDesc_authority: '策略更新需达到此比例的 LP 投票。',
+    policyVal_assets: 'BTC · ETH · SOL · ARB',
+    minutesAgo: '{n} 分钟前', secondsAgo: '{n} 秒前', justNow: '刚刚',
+    blockReasons: {
+      'leverage-cap': '杠杆上限 (5×) — 申请 {x}×',
+      'asset-whitelist': '标的 {asset} 未在白名单内',
+      'concentration-cap': '集中度上限 — 将突破单标的 {pct}% 限额',
+      'withdrawal-limit': '提款上限 — 超过单 LP 每日 25% 限额',
+      'dd-pause': '交易暂停 — 已触及每日回撤阈值',
+    },
+  },
+};
+
+const policyConfig = [
+  { id:'leverage', name:'policyName_leverage', desc:'policyDesc_leverage', value:'5×' },
+  { id:'assets', name:'policyName_assets', desc:'policyDesc_assets', valueKey:'policyVal_assets' },
+  { id:'dd', name:'policyName_dd', desc:'policyDesc_dd', value:'8%' },
+  { id:'concentration', name:'policyName_concentration', desc:'policyDesc_concentration', value:'40%' },
+  { id:'withdraw', name:'policyName_withdraw', desc:'policyDesc_withdraw', value:'24h / 25%' },
+  { id:'venue', name:'policyName_venue', desc:'policyDesc_venue', value:'Hyperliquid' },
+  { id:'authority', name:'policyName_authority', desc:'policyDesc_authority', value:'51%' },
+];
+
+// Activity log seed data — mix of allowed and blocked
+let activities = [
+  { id:'evt-101', minsAgo:2, action:{type:'open', side:'long', asset:'BTC-PERP', size:250000, leverage:3.2}, decision:'allowed', rules:['leverage','assets','concentration'] },
+  { id:'evt-100', minsAgo:7, action:{type:'close', side:'short', asset:'ETH-PERP', size:180000, leverage:0, pct:50}, decision:'allowed', rules:['venue'] },
+  { id:'evt-099', minsAgo:13, action:{type:'attempt-open', side:'long', asset:'ETH-PERP', size:1200000, leverage:12}, decision:'blocked', blockReason:'leverage-cap', blockData:{x:12} },
+  { id:'evt-098', minsAgo:20, action:{type:'rebalance', asset:'SOL-PERP', size:90000, leverage:0}, decision:'allowed', rules:['leverage','concentration'] },
+  { id:'evt-097', minsAgo:34, action:{type:'attempt-open', side:'long', asset:'MATIC-PERP', size:300000, leverage:3}, decision:'blocked', blockReason:'asset-whitelist', blockData:{asset:'MATIC-PERP'} },
+  { id:'evt-096', minsAgo:42, action:{type:'rebalance', asset:'ETH', size:1.7e6, leverage:0, label:'collateral 12%'}, decision:'allowed', rules:['concentration','venue'] },
+  { id:'evt-095', minsAgo:58, action:{type:'close', side:'long', asset:'BTC-PERP', size:420000, leverage:0, pnl:'+1.8%'}, decision:'allowed', rules:['venue'] },
+  { id:'evt-094', minsAgo:74, action:{type:'attempt-withdraw', size:4500000, label:'32% of TVL'}, decision:'blocked', blockReason:'withdrawal-limit', blockData:{pct:32} },
+  { id:'evt-093', minsAgo:88, action:{type:'open', side:'long', asset:'ARB-PERP', size:80000, leverage:2.5}, decision:'allowed', rules:['leverage','assets','concentration'] },
+  { id:'evt-092', minsAgo:101, action:{type:'close', side:'long', asset:'SOL-PERP', size:150000, leverage:0, pct:100, pnl:'+0.6%'}, decision:'allowed', rules:['venue'] },
+  { id:'evt-091', minsAgo:124, action:{type:'attempt-open', side:'long', asset:'DOGE-PERP', size:50000, leverage:4}, decision:'blocked', blockReason:'asset-whitelist', blockData:{asset:'DOGE-PERP'} },
+  { id:'evt-090', minsAgo:138, action:{type:'adjust', side:'short', asset:'ETH-PERP', leverage:4, label:'leverage to 4×'}, decision:'allowed', rules:['leverage','assets'] },
+  { id:'evt-089', minsAgo:165, action:{type:'open', side:'short', asset:'ETH-PERP', size:200000, leverage:3}, decision:'allowed', rules:['leverage','assets','concentration'] },
+  { id:'evt-088', minsAgo:188, action:{type:'rebalance', asset:'BTC', size:540000, leverage:0, label:'spot delta'}, decision:'allowed', rules:['venue','concentration'] },
+  { id:'evt-087', minsAgo:212, action:{type:'close', side:'short', asset:'SOL-PERP', size:60000, leverage:0, pct:100, pnl:'+0.2%'}, decision:'allowed', rules:['venue'] },
+];
+
+let lang = 'en';
+let currentFilter = 'all';
+
+function $(id) { return document.getElementById(id); }
+function t(key) { return (i18n[lang] && i18n[lang][key]) || i18n.en[key] || key; }
+function fmtUsd(n) {
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n/1e3).toFixed(0) + 'K';
+  return '$' + n.toLocaleString('en-US');
+}
+function fmtTime(minsAgo) {
+  if (minsAgo === 0) return t('justNow');
+  if (minsAgo < 1) return t('secondsAgo').replace('{n}', Math.round(minsAgo * 60));
+  return t('minutesAgo').replace('{n}', minsAgo);
+}
+function genHash(prefix='0x') {
+  const c = '0123456789abcdef';
+  let h = prefix;
+  for (let i=0;i<8;i++) h += c[Math.floor(Math.random()*16)];
+  h += '...';
+  for (let i=0;i<6;i++) h += c[Math.floor(Math.random()*16)];
+  return h;
+}
+function genFullHash() {
+  const c = '0123456789abcdef';
+  let h = '0x';
+  for (let i=0;i<60;i++) h += c[Math.floor(Math.random()*16)];
+  return h;
+}
+
+function actionDescription(a) {
+  const action = a.action;
+  let typeLabel = '';
+  if (action.type === 'open' || action.type === 'attempt-open') {
+    typeLabel = action.type === 'attempt-open' ? t('actionType_attempt') + ' ' + t('actionType_open').toLowerCase() : t('actionType_open');
+  } else if (action.type === 'close') typeLabel = t('actionType_close');
+  else if (action.type === 'adjust') typeLabel = t('actionType_adjust');
+  else if (action.type === 'rebalance') typeLabel = t('actionType_rebalance');
+  else if (action.type === 'attempt-withdraw') typeLabel = t('actionType_attempt') + ' ' + t('actionType_withdraw').toLowerCase();
+
+  let parts = [typeLabel];
+  if (action.side) {
+    if (action.leverage > 0 && (action.type === 'open' || action.type === 'attempt-open')) {
+      parts.push(t('leverageX').replace('{x}', action.leverage));
+    }
+    parts.push(t('side' + action.side.charAt(0).toUpperCase() + action.side.slice(1)));
+  }
+  if (action.pct === 100) parts.push('100%');
+  else if (action.pct) parts.push(action.pct + '%');
+  if (action.asset) parts.push(`<span class="asset">${action.asset}</span>`);
+  if (action.size && action.type !== 'rebalance') parts.push(fmtUsd(action.size));
+  if (action.label) parts.push(action.label);
+  if (action.pnl) parts.push(`(${action.pnl})`);
+  return parts.join(' ');
+}
+
+function renderActivity() {
+  const filtered = activities.filter(a => currentFilter === 'all' || a.decision === currentFilter);
+  const html = filtered.map(a => {
+    const desc = actionDescription(a);
+    let blockReasonHtml = '';
+    if (a.decision === 'blocked' && a.blockReason) {
+      let reasonText = t('blockReasons')[a.blockReason] || a.blockReason;
+      if (a.blockData) {
+        Object.keys(a.blockData).forEach(k => {
+          reasonText = reasonText.replace('{' + k + '}', a.blockData[k]);
+        });
+      }
+      blockReasonHtml = `<div class="activity-block-reason">${reasonText}</div>`;
+    }
+    return `
+    <div class="activity-item ${a.decision}" onclick="openModal('${a.id}')">
+      <div class="activity-side">
+        ${a.decision === 'allowed'
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>'}
+      </div>
+      <div class="activity-content">
+        <div class="activity-action">${desc}</div>
+        <div class="activity-meta-row">
+          <span>${fmtTime(a.minsAgo)}</span>
+          <span class="dot">·</span>
+          <span style="font-family: 'JetBrains Mono', monospace;">${a.id}</span>
+        </div>
+        ${blockReasonHtml}
+      </div>
+      <div class="activity-decision ${a.decision}">${t('decision' + a.decision.charAt(0).toUpperCase() + a.decision.slice(1))}</div>
+    </div>`;
+  }).join('');
+  $('activity-list').innerHTML = html;
+  // counts
+  const allowedN = activities.filter(a => a.decision === 'allowed').length;
+  const blockedN = activities.filter(a => a.decision === 'blocked').length;
+  $('count-all').textContent = activities.length;
+  $('count-allowed').textContent = allowedN;
+  $('count-blocked').textContent = blockedN;
+  $('kpi-gates-value').textContent = `${allowedN} / ${blockedN}`;
+  $('kpi-allowed-count').textContent = t('allowedCount').replace('{n}', allowedN);
+  $('kpi-blocked-count').textContent = t('blockedCount').replace('{n}', blockedN);
+}
+
+function renderPolicy() {
+  const html = policyConfig.map(p => {
+    const value = p.valueKey ? t(p.valueKey) : p.value;
+    return `
+    <div class="policy-item">
+      <div class="policy-item-info">
+        <div class="policy-item-name">${t(p.name)}</div>
+        <div class="policy-item-desc">${t(p.desc)}</div>
+      </div>
+      <div class="policy-item-value">${value}</div>
+    </div>`;
+  }).join('');
+  $('policy-list').innerHTML = html;
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.filter === f));
+  renderActivity();
+}
+
+function setLang(newLang) {
+  if (!i18n[newLang]) return;
+  lang = newLang;
+  document.body.setAttribute('data-lang', lang);
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === newLang);
+  });
+  renderActivity();
+  renderPolicy();
+}
+
+function openModal(evtId) {
+  const evt = activities.find(a => a.id === evtId);
+  if (!evt) return;
+  const action = evt.action;
+  const sigHash = genFullHash();
+  const sigShort = sigHash.slice(0, 14) + '...' + sigHash.slice(-8);
+  const blockHeight = (1287000 + Math.floor(Math.random() * 99999)).toLocaleString('en-US');
+  const policyVer = 'v1.4 · ' + genHash().slice(0, 14);
+
+  // Determine which rules were evaluated and pass/fail
+  const allRules = ['leverage', 'assets', 'concentration', 'venue', 'withdraw'];
+  const evaluatedRules = allRules.map(r => ({
+    id: r,
+    name: t('policyName_' + r),
+    pass: evt.decision === 'allowed' ? true : (evt.blockReason !== {leverage:'leverage-cap', assets:'asset-whitelist', concentration:'concentration-cap', venue:null, withdraw:'withdrawal-limit'}[r])
+  }));
+
+  const params = [
+    { lbl: t('paramAction'), val: action.type.replace('attempt-', '').replace(/-/g, ' ') },
+    action.asset ? { lbl: t('paramAsset'), val: action.asset, mono: true } : null,
+    action.side ? { lbl: t('paramSide'), val: t('side' + action.side.charAt(0).toUpperCase() + action.side.slice(1)) } : null,
+    action.size ? { lbl: t('paramSize'), val: fmtUsd(action.size) } : null,
+    action.leverage > 0 ? { lbl: t('paramLeverage'), val: action.leverage + '×' } : null,
+    { lbl: t('paramVenue'), val: 'Hyperliquid' },
+    { lbl: t('paramManager'), val: '0xApex...91b3', mono: true },
+    { lbl: t('paramTime'), val: fmtTime(evt.minsAgo), mono: false },
+  ].filter(Boolean);
+
+  let blockReasonText = '';
+  if (evt.decision === 'blocked' && evt.blockReason) {
+    let r = t('blockReasons')[evt.blockReason] || evt.blockReason;
+    if (evt.blockData) Object.keys(evt.blockData).forEach(k => r = r.replace('{' + k + '}', evt.blockData[k]));
+    blockReasonText = r;
+  }
+
+  const html = `
+    <div class="modal-header">
+      <div class="modal-tag ${evt.decision}">
+        ${evt.decision === 'allowed' ? '✓' : '✕'}
+        <span>${t('decision' + evt.decision.charAt(0).toUpperCase() + evt.decision.slice(1))}</span>
+      </div>
+      <div class="modal-title">${t('enforcementRecord')}</div>
+      <div class="modal-sub">${evt.id} · ${policyVer}</div>
+      <button class="modal-close" onclick="closeModal()" aria-label="${t('closeBtn')}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      ${blockReasonText ? `
+        <div class="modal-section">
+          <div class="modal-section-title">${t('blockedReason')}</div>
+          <div style="background: rgba(225,29,72,0.06); border: 1px solid rgba(225,29,72,0.18); padding: 12px 14px; border-radius: 12px; color: var(--red); font-weight: 700; font-size: 13px;">${blockReasonText}</div>
+        </div>
+      ` : ''}
+
+      <div class="modal-section">
+        <div class="modal-section-title">${t('actionParams')}</div>
+        <div class="params-grid">
+          ${params.map(p => `<div class="param-row"><span class="lbl">${p.lbl}</span><span class="val ${p.mono ? 'mono' : ''}">${p.val}</span></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">${t('rulesEvaluated')}</div>
+        <div class="rules-eval">
+          ${evaluatedRules.map(r => `
+            <div class="rule-row">
+              <div class="rule-status ${r.pass ? 'pass' : 'fail'}">${r.pass ? '✓' : '✕'}</div>
+              <div class="rule-name">${r.name}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">${t('sigSection')}</div>
+        <div class="signature-card">
+          <div class="lbl">${t('ruleSigHash')}</div>
+          <div class="hash">${sigShort}</div>
+          <div class="meta">
+            <span>${t('ruleBlockHeight')}: <strong>${blockHeight}</strong></span>
+            <span>${t('paramVenue')}: <strong>Hyperliquid</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  $('modal-content').innerHTML = html;
+  $('modal').classList.add('show');
+}
+
+function closeModal() {
+  $('modal').classList.remove('show');
+}
+
+// Simulate live events arriving every 12 seconds
+const newEventTemplates = [
+  { action:{type:'open', side:'long', asset:'BTC-PERP', size:175000, leverage:2.8}, decision:'allowed', rules:['leverage','assets','concentration'] },
+  { action:{type:'close', side:'short', asset:'ETH-PERP', size:90000, leverage:0, pct:30, pnl:'+0.4%'}, decision:'allowed', rules:['venue'] },
+  { action:{type:'attempt-open', side:'long', asset:'ETH-PERP', size:800000, leverage:8}, decision:'blocked', blockReason:'leverage-cap', blockData:{x:8} },
+  { action:{type:'rebalance', asset:'SOL-PERP', size:60000, leverage:0, label:'delta hedge'}, decision:'allowed', rules:['leverage','venue'] },
+  { action:{type:'attempt-open', side:'long', asset:'AVAX-PERP', size:120000, leverage:4}, decision:'blocked', blockReason:'asset-whitelist', blockData:{asset:'AVAX-PERP'} },
+  { action:{type:'open', side:'short', asset:'SOL-PERP', size:140000, leverage:3.5}, decision:'allowed', rules:['leverage','assets','concentration'] },
+  { action:{type:'close', side:'long', asset:'ARB-PERP', size:80000, leverage:0, pct:50}, decision:'allowed', rules:['venue'] },
+];
+
+let nextEventCounter = 102;
+function pushNewEvent() {
+  const tmpl = newEventTemplates[Math.floor(Math.random() * newEventTemplates.length)];
+  const evt = JSON.parse(JSON.stringify(tmpl));
+  evt.id = 'evt-' + (nextEventCounter++).toString().padStart(3, '0');
+  evt.minsAgo = 0;
+  // Bump existing events' minsAgo
+  activities.forEach(a => a.minsAgo += 1);
+  activities.unshift(evt);
+  if (activities.length > 18) activities.pop();
+  renderActivity();
+  // animate the new top item
+  const list = $('activity-list');
+  if (list.firstElementChild) list.firstElementChild.classList.add('new');
+}
+setInterval(pushNewEvent, 12000);
+
+// init
+renderPolicy();
+renderActivity();
+</script>
+</body>
+</html>
